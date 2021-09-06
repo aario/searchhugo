@@ -3,11 +3,13 @@ package main
 import (
     "io/ioutil"
     "strings"
+    "regexp"
 )
 
 const (
     MIN_WORD_LENGTH = 1
     CONTENT_SUMMARY_LENGTH = 300
+    SPLIT_REGEXP_DELIMITER_PATTERN = "[^a-zA-Z0-9\\-]"
 )
 
 type Post struct {
@@ -30,11 +32,13 @@ type Index struct {
 
 var (
     index Index
+    splitRegexp *   regexp.Regexp
 )
 
 func initializeIndex() {
     index.Posts = make([]Post, 0)
     index.Words = make(map[string]map[int][]Occurance, 0)
+    splitRegexp = regexp.MustCompile(SPLIT_REGEXP_DELIMITER_PATTERN)
 }
 
 func stripNonAlphaNumeric(s string) string {
@@ -160,7 +164,7 @@ func indexText(
     beginPositionIndex int,
 ) int {
     positionIndex := beginPositionIndex
-    for _, word := range strings.Split(text, " ") {
+    for _, word := range splitRegexp.Split(text, -1) {
         indexWord(
             postId,
             word,
