@@ -51,6 +51,8 @@ func main() {
 
     flag.Parse()
 
+    dbConnect()
+
     var err error
     var currentPath string
 

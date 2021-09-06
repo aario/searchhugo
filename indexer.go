@@ -122,7 +122,7 @@ func readContent(path string, url string) (Post, string) {
     return post, content
 }
 
-func indexWord(
+func addWordOccuranceToIndex(
     postId int,
     word string,
     positionScore int,
@@ -154,6 +154,40 @@ func indexWord(
     index.Words[word] = wordOccurances
 }
 
+func indexWord(
+    postId int,
+    word string,
+    positionScore int,
+    positionIndex int,
+) {
+    addWordOccuranceToIndex(
+        postId,
+        word,
+        positionScore * RATING_SCORE_SAME,
+        positionIndex,
+    )
+
+    synonyms, antonyms := thesaurusLookup(word)
+
+    for _, synonym := range synonyms {
+        addWordOccuranceToIndex(
+            postId,
+            synonym,
+            positionScore * RATING_SCORE_SYNONYM,
+            positionIndex,
+        )
+    }
+
+    for _, antonym := range antonyms {
+        addWordOccuranceToIndex(
+            postId,
+            antonym,
+            positionScore * RATING_SCORE_ANTONYM,
+            positionIndex,
+        )
+    }
+}
+
 /*
  * returns int the last positionIndex counted
  */
@@ -167,7 +201,7 @@ func indexText(
     for _, word := range splitRegexp.Split(text, -1) {
         indexWord(
             postId,
-            word,
+            strings.ToLower(word),
             positionScore,
             positionIndex,
         )
